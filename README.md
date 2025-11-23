@@ -258,12 +258,11 @@ Based on XV6, which is licensed under the MIT License.
 - The XV6 book and documentation
 - All contributors to the XV6 project
 
-## 📞 Support
+## 📧 Contact
 
-For questions or issues:
-1. Check the [documentation](docs/)
-2. Review [TROUBLESHOOTING](docs/README_FIRST.txt#troubleshooting)
-3. See [EXPECTED_OUTPUT.txt](docs/EXPECTED_OUTPUT.txt) for correct behavior
+- **Author**: AnjaniNithin
+- **GitHub**: [@Nithinchalamchala](https://github.com/Nithinchalamchala)
+- **Repository**: [cfg2yacc](https://github.com/Nithinchalamchala/cfg2yacc)
 
 ---
 
