@@ -1,16 +1,31 @@
+# XV6 Build artifacts (in xv6-source/)
+xv6-source/*.o
+xv6-source/*.d
+xv6-source/*.asm
+xv6-source/*.sym
+xv6-source/*~
+xv6-source/_*
+xv6-source/kernel
+xv6-source/xv6.img
+xv6-source/fs.img
+xv6-source/kernelmemfs
+xv6-source/xv6memfs.img
+xv6-source/bootblock
+xv6-source/bootblock.o
+xv6-source/bootblockother.o
+xv6-source/entryother
+xv6-source/initcode
+xv6-source/initcode.out
+xv6-source/vectors.S
+xv6-source/.gdbinit
+xv6-source/mkfs
+
+# macOS
+.DS_Store
+
+# Editor files
+*.swp
+*.swo
 *~
-_*
-*.o
-*.d
-*.asm
-*.sym
-*.img
-vectors.S
-bootblock
-entryother
-initcode
-initcode.out
-kernel
-kernelmemfs
-mkfs
-.gdbinit
+.vscode/
+.idea/

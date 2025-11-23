@@ -1,0 +1,42 @@
+# Build artifacts
+*.o
+*.d
+*.asm
+*.sym
+*~
+
+# Executables
+_*
+!_*.*
+
+# Kernel and images
+kernel
+xv6.img
+fs.img
+kernelmemfs
+xv6memfs.img
+
+# Boot files
+bootblock
+bootblock.o
+bootblockother.o
+entryother
+initcode
+initcode.out
+
+# Generated files
+vectors.S
+.gdbinit
+
+# Build tools
+mkfs
+
+# macOS
+.DS_Store
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
