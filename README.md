@@ -262,7 +262,7 @@ Based on XV6, which is licensed under the MIT License.
 
 - **Author**: AnjaniNithin
 - **GitHub**: [@Nithinchalamchala](https://github.com/Nithinchalamchala)
-- **Repository**: [cfg2yacc](https://github.com/Nithinchalamchala/cfg2yacc)
+- **Repository**: [XV6_Modified](https://github.com/Nithinchalamchala/xv6-enhanced-kernel)
 
 ---
 
