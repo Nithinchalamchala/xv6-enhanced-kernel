@@ -108,6 +108,7 @@ extern int sys_logout(void);
 extern int sys_getuid(void);
 extern int sys_chmod(void);
 extern int sys_reboot(void);
+extern int sys_getprocinfo(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -136,6 +137,7 @@ static int (*syscalls[])(void) = {
 [SYS_getuid]  sys_getuid,
 [SYS_chmod]   sys_chmod,
 [SYS_reboot]  sys_reboot,
+[SYS_getprocinfo] sys_getprocinfo,
 };
 
 void

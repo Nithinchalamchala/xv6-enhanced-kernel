@@ -28,6 +28,7 @@ int logout(void);
 int getuid(void);
 int chmod(const char*, int);
 int reboot(void);
+int getprocinfo(int pid, int *priority, int *ticks, uint *runtime, int *state, char *name);
 
 // ulib.c
 int stat(const char*, struct stat*);

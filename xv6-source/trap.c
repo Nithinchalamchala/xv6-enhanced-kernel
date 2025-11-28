@@ -14,6 +14,15 @@ extern uint vectors[];  // in vectors.S: array of 256 entry pointers
 struct spinlock tickslock;
 uint ticks;
 
+// MLFQ boost tracking
+#define BOOST_INTERVAL 1000  // Boost every 1000 ticks (~10 seconds)
+static uint boost_timer = 0;
+static int mlfq_debug = 0;  // Debug mode off by default
+extern struct {
+  struct spinlock lock;
+  struct proc proc[NPROC];
+} ptable;
+
 void
 tvinit(void)
 {
@@ -53,6 +62,24 @@ trap(struct trapframe *tf)
       ticks++;
       wakeup(&ticks);
       release(&tickslock);
+      
+      // MLFQ: Check for priority boost
+      boost_timer++;
+      if(boost_timer >= BOOST_INTERVAL){
+        acquire(&ptable.lock);
+        struct proc *p;
+        for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+          if(p->state != UNUSED){
+            p->priority = 0;
+            p->ticks_used = 0;
+            p->wait_ticks = 0;
+          }
+        }
+        release(&ptable.lock);
+        boost_timer = 0;
+        if(mlfq_debug)
+          cprintf("[MLFQ] Priority boost - all processes moved to queue 0\n");
+      }
     }
     lapiceoi();
     break;
@@ -117,8 +144,9 @@ trap(struct trapframe *tf)
       // Demote to lower priority if not already at lowest
       if(p->priority < 2){
         p->priority++;
-        cprintf("[MLFQ] Process %d (%s) demoted to queue %d\n", 
-                p->pid, p->name, p->priority);
+        if(mlfq_debug)
+          cprintf("[MLFQ] Process %d (%s) demoted to queue %d\n", 
+                  p->pid, p->name, p->priority);
       }
       p->ticks_used = 0;
       yield();  // Give up CPU

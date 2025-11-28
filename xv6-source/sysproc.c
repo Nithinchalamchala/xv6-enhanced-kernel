@@ -214,3 +214,46 @@ sys_reboot(void)
   outb(0x64, 0xFE);
   return 0;
 }
+
+// Get process info for MLFQ monitoring
+int
+sys_getprocinfo(void)
+{
+  int pid;
+  int *priority, *ticks, *state;
+  uint *runtime;
+  char *name;
+  struct proc *p;
+  extern struct {
+    struct spinlock lock;
+    struct proc proc[NPROC];
+  } ptable;
+  
+  if(argint(0, &pid) < 0)
+    return -1;
+  if(argptr(1, (void*)&priority, sizeof(*priority)) < 0)
+    return -1;
+  if(argptr(2, (void*)&ticks, sizeof(*ticks)) < 0)
+    return -1;
+  if(argptr(3, (void*)&runtime, sizeof(*runtime)) < 0)
+    return -1;
+  if(argptr(4, (void*)&state, sizeof(*state)) < 0)
+    return -1;
+  if(argptr(5, (void*)&name, 16) < 0)
+    return -1;
+  
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->pid == pid && p->state != UNUSED){
+      *priority = p->priority;
+      *ticks = p->ticks_used;
+      *runtime = p->total_runtime;
+      *state = p->state;
+      safestrcpy(name, p->name, 16);
+      release(&ptable.lock);
+      return 0;
+    }
+  }
+  release(&ptable.lock);
+  return -1;
+}

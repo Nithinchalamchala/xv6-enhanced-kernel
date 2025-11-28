@@ -25,3 +25,4 @@
 #define SYS_getuid 24
 #define SYS_chmod  25
 #define SYS_reboot 26
+#define SYS_getprocinfo 27

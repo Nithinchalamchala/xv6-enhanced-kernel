@@ -305,6 +305,9 @@ getcmd(char *buf, int nbuf)
   buf[i] = '\n';
   buf[i+1] = 0;
   
+  // Print newline to move to next line
+  printf(2, "\n");
+  
   // Add to history if not empty
   if(buf[0] != '\n' && buf[0] != 0){
     add_to_history(buf);

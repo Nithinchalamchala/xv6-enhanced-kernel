@@ -330,8 +330,6 @@ wait(void)
 #define BOOST_INTERVAL 100  // Priority boost every 100 ticks
 #define AGING_THRESHOLD 50  // Promote if waiting > 50 ticks
 
-static int boost_timer = 0;
-
 // Get time quantum for priority level
 int
 get_quantum(int priority)
@@ -342,6 +340,7 @@ get_quantum(int priority)
 }
 
 // Priority boost - move all processes to highest priority
+// Must be called with ptable.lock held
 void
 priority_boost(void)
 {
@@ -353,7 +352,6 @@ priority_boost(void)
       p->wait_ticks = 0;
     }
   }
-  boost_timer = 0;
   cprintf("[MLFQ] Priority boost - all processes moved to queue 0\n");
 }
 
@@ -372,12 +370,6 @@ scheduler(void)
     sti();
 
     acquire(&ptable.lock);
-    
-    // Priority boost if needed
-    boost_timer++;
-    if(boost_timer >= BOOST_INTERVAL){
-      priority_boost();
-    }
     
     // Select process using MLFQ
     selected = 0;
@@ -410,21 +402,6 @@ scheduler(void)
 
       // Process is done running for now
       c->proc = 0;
-    } else {
-      // No runnable process - age waiting processes
-      for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-        if(p->state == RUNNABLE){
-          p->wait_ticks++;
-          // Aging: promote if waiting too long
-          if(p->wait_ticks >= AGING_THRESHOLD && p->priority > 0){
-            p->priority--;
-            p->wait_ticks = 0;
-            p->ticks_used = 0;
-            cprintf("[MLFQ] Process %d promoted to queue %d (aging)\n", 
-                    p->pid, p->priority);
-          }
-        }
-      }
     }
     
     release(&ptable.lock);

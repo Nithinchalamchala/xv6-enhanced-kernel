@@ -1,305 +1,179 @@
-# XV6 User Authentication & File Permissions
+# XV6 Operating System Enhancements
 
-A comprehensive implementation of user authentication, file permissions, and enhanced shell features for the XV6 operating system.
+A comprehensive enhancement of the MIT xv6 educational operating system with modern features including user authentication, file permissions, advanced shell capabilities, and a Multi-Level Feedback Queue (MLFQ) scheduler.
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Platform](https://img.shields.io/badge/platform-xv6-orange.svg)
-![Language](https://img.shields.io/badge/language-C-green.svg)
+## 🚀 Features
 
-## 📂 Repository Structure
+### ✅ User Authentication System
+- **Three user types**: admin, user1, user2 with different permission levels
+- **Secure login/logout**: Complete session management
+- **Permission enforcement**: UID-based access control
 
-```
-xv6-user-authentication/
-├── README.md                    # You are here
-├── CHANGELOG.md                 # Version history
-├── CONTRIBUTING.md              # How to contribute
-├── docs/                        # All documentation (13 files)
-│   ├── README_FIRST.txt         # ⭐ Start here
-│   ├── DEMO_SCRIPT.txt          # Step-by-step demo
-│   └── ...
-└── xv6-source/                  # All XV6 source code
-    ├── Makefile                 # Build system
-    ├── *.c, *.h, *.S            # Source files
-    └── ...
-```
+### ✅ File Permission System  
+- **File ownership tracking**: UID-based file ownership
+- **Access control**: Read, write, execute permissions
+- **Administrative tools**: chmod command for permission management
 
-## 🎯 Features
+### ✅ Enhanced Shell
+- **Command history**: Up/down arrow navigation through previous commands
+- **Tab completion**: Auto-complete for commands and filenames
+- **User-specific prompts**: Display current user in shell prompt
+- **Clear command**: Screen clearing functionality
 
-- ✅ **User Authentication System** - Login/logout with username and password
-- ✅ **File Permissions** - Owner-based access control with read/write permissions
-- ✅ **Three User Types**:
-  - `admin/admin` - Full access (read, write, chmod)
-  - `user1/pass1` - Read-only access
-  - `user2/pass2` - Read and write access
-- ✅ **MLFQ Scheduler**:
-  - Multi-Level Feedback Queue with 3 priority levels
-  - Dynamic priority adjustment based on CPU usage
-  - Priority boost and aging to prevent starvation
-  - Better responsiveness for I/O-bound processes
-  - Test programs to demonstrate scheduler behavior
-- ✅ **Enhanced Shell**:
-  - Tab completion for filenames
-  - Command history (up/down arrows for last 10 commands)
-  - Clear command to clear screen
-  - History command to view past commands
-  - User-specific prompt (admin$, user1$, user2$)
-  - Built-in logout command
-- ✅ **New Commands**:
-  - `whoami` - Display current user
-  - `chmod` - Change file permissions (admin only)
-  - `logout` - Logout and return to login screen
-  - `reboot` - Reboot the system
-- ✅ **Enhanced ls** - Shows permissions (rwxa format) and owner UID
-- ✅ **Error Messages** - Clear feedback for permission denied operations
+### ✅ MLFQ Scheduler
+- **Three priority levels**: High (0), Medium (1), Low (2) priority queues
+- **Automatic demotion**: CPU-bound processes move to lower priorities
+- **Priority boost**: Periodic boost to prevent starvation
+- **Fair scheduling**: Optimal for mixed workloads
 
-## 🚀 Quick Start
+### ✅ Process Monitoring
+- **ps command**: Real-time process information with priorities
+- **getprocinfo() system call**: Detailed process statistics
+- **Scheduler observation**: Monitor MLFQ behavior in real-time
 
-### Build and Run
+## 🛠️ Quick Start
 
+### Prerequisites
+- Linux (Ubuntu/Debian recommended) or macOS
+- GCC compiler and Make
+- QEMU for emulation
+
+### Installation
 ```bash
+# Clone the repository
+git clone https://github.com/yourusername/xv6-enhanced.git
+cd xv6-enhanced
+
+# Build and run
 cd xv6-source
-make clean
 make
 make qemu-nox
 ```
 
-### Login
-
+### First Login
 ```
 Username: admin
 Password: admin
 ```
 
-### Try It Out
+## 📋 User Accounts
 
+| Username | Password | Permissions | Description |
+|----------|----------|-------------|-------------|
+| admin    | admin    | Full access | Can modify files, change permissions |
+| user1    | pass1    | Read-only   | Can read and execute files only |
+| user2    | pass2    | Read+Write  | Can read, write, and execute files |
+
+## 🧪 Testing Features
+
+### Test Authentication
 ```bash
 admin$ whoami
-admin (uid: 1)
-
-admin$ echo "Hello World" > test.txt
-admin$ ls
-rw-- test.txt       uid:1 2 24 12
-
-admin$ chmod test.txt 1
-admin$ ls
-r--- test.txt       uid:1 2 24 12
-
-admin$ echo "try to write" >> test.txt
-Permission denied: cannot open read-only file for writing
-
 admin$ logout
+# Login as different user
+Username: user1
+Password: pass1
+user1$ whoami
 ```
 
-## 📚 Documentation
-
-All documentation is in the `docs/` folder:
-
-- **[START HERE](docs/README_FIRST.txt)** - Quick start guide
-- **[DEMO_SCRIPT.txt](docs/DEMO_SCRIPT.txt)** - Step-by-step demonstration (18 tests)
-- **[EXPECTED_OUTPUT.txt](docs/EXPECTED_OUTPUT.txt)** - Exact output for every test
-- **[QUICK_REFERENCE.txt](docs/QUICK_REFERENCE.txt)** - Command reference card
-
-### Technical Documentation
-
-- [IMPLEMENTATION_DETAILS.txt](docs/IMPLEMENTATION_DETAILS.txt) - Complete technical documentation
-- [BUGS_FIXED.txt](docs/BUGS_FIXED.txt) - Bug fixes explained
-- [APPEND_BUG_FIXED.txt](docs/APPEND_BUG_FIXED.txt) - Append (>>) fix
-- [ERROR_MESSAGES_ADDED.txt](docs/ERROR_MESSAGES_ADDED.txt) - Error message improvements
-
-### Testing
-
-- [TESTING_GUIDE.txt](docs/TESTING_GUIDE.txt) - Comprehensive testing instructions
-- [FINAL_VERIFICATION.txt](docs/FINAL_VERIFICATION.txt) - Verification checklist
-
-## 🔐 Default Users
-
-| Username | Password | UID | Permissions | Description |
-|----------|----------|-----|-------------|-------------|
-| admin | admin | 1 | Read, Write, Execute, Admin | Full system access |
-| user1 | pass1 | 2 | Read, Execute | Read-only user |
-| user2 | pass2 | 3 | Read, Write, Execute | Regular user |
-
-## 📝 Permission Flags
-
-Files display permissions in `rwxa` format:
-- `r` = Read permission
-- `w` = Write permission
-- `x` = Execute permission
-- `a` = Admin permission
-
-Example: `rw--` means read+write, no execute, no admin
-
-## 🛠️ New Commands
-
-### whoami
-Display current logged-in user and UID
+### Test File Permissions
 ```bash
-admin$ whoami
-admin (uid: 1)
-```
-
-### chmod
-Change file permissions (admin only)
-```bash
-admin$ chmod file.txt 1    # Read-only
-admin$ chmod file.txt 3    # Read+Write
-```
-
-### logout
-Logout and return to login screen
-```bash
+admin$ echo "test" > file.txt
+admin$ chmod file.txt 0644
 admin$ logout
-Logged out successfully. Exiting shell...
+# Login as user1
+user1$ cat file.txt     # Should work
+user1$ echo "fail" > file.txt  # Should fail
 ```
 
-### reboot
-Reboot the system
+### Test MLFQ Scheduler
 ```bash
-admin$ reboot
+admin$ mlfqtest    # Run comprehensive MLFQ test
+admin$ ps          # Monitor process priorities
+admin$ cpubound &  # Run CPU-intensive process
+admin$ ps          # See process demotion
 ```
 
-### ls (enhanced)
-Shows permissions and owner UID
+### Test Shell Features
 ```bash
 admin$ ls
-rw-- README         uid:1 2 1 2286
-rw-- test.txt       uid:1 2 24 12
+admin$ history     # View command history
+admin$ wh<TAB>     # Tab completion (completes to whoami)
+admin$ clear       # Clear screen
 ```
 
-### clear
-Clear the screen
-```bash
-admin$ clear
-```
+## 📊 MLFQ Scheduler Details
 
-### history
-View command history
-```bash
-admin$ history
-1  whoami
-2  echo "test" > file.txt
-3  ls
-4  cat file.txt
-```
+### Priority Levels
+- **Priority 0 (High)**: 4 ticks quantum - Interactive, I/O-bound processes
+- **Priority 1 (Medium)**: 8 ticks quantum - Mixed workload processes  
+- **Priority 2 (Low)**: 16 ticks quantum - CPU-bound, background processes
 
-### Tab Completion
-Press TAB to auto-complete filenames
-```bash
-admin$ cat RE<TAB>
-admin$ cat README
-```
-
-### Command History
-Use up/down arrow keys to navigate through previous commands
-```bash
-admin$ whoami
-admin (uid: 1)
-admin$ <press UP arrow>
-admin$ whoami  # Previous command appears
-```
-
-## 🐛 Bugs Fixed
-
-1. ✅ **Logout Bug** - Logout now properly exits shell and returns to login
-2. ✅ **Permission Bug** - Read-only files now block writes for everyone (including owner)
-3. ✅ **Append Bug** - `>>` now correctly appends instead of overwriting
-4. ✅ **Error Messages** - Added clear error messages for permission denied
+### Scheduler Rules
+1. Higher priority processes run first
+2. Same priority processes use round-robin
+3. New processes start at highest priority
+4. Process demotion after using full quantum
+5. Priority boost every 1000 ticks prevents starvation
 
 ## 🏗️ Architecture
 
-### Modified Files
+The enhanced xv6 maintains the original architecture while adding:
 
-**Kernel Headers:**
-- `stat.h`, `file.h`, `fs.h`, `proc.h` - Added uid and permissions fields
-- `syscall.h` - Added new system calls
-- `fcntl.h` - Added O_APPEND flag
-- `user_auth.h` - New authentication structures
+- **Extended process structure** with UID, permissions, and MLFQ fields
+- **New system calls** for authentication and monitoring
+- **Enhanced file system** with permission checking
+- **Improved shell** with modern features
 
-**Kernel Source:**
-- `syscall.c`, `usys.S` - System call registration
-- `sysproc.c` - Authentication implementation
-- `sysfile.c` - Permission checking and error messages
-- `fs.c` - Save/load permissions to/from disk
-- `proc.c` - User credential management
+## 📁 Project Structure
 
-**User Programs:**
-- `init.c` - Login screen at boot
-- `sh.c` - Tab completion, logout handling, append fix
-- `ls.c` - Display permissions and owner
-
-**New Programs:**
-- `login.c`, `logout.c`, `whoami.c`, `chmod.c`, `reboot.c`
-
-## 🧪 Testing
-
-### Quick Test
-```bash
-$ cd xv6-source
-$ make qemu-nox
-Username: admin
-Password: admin
-
-admin$ echo "line 1" > test.txt
-admin$ echo "line 2" >> test.txt
-admin$ cat test.txt
-line 1
-line 2
-
-admin$ chmod test.txt 1
-admin$ echo "should fail" >> test.txt
-Permission denied: cannot open read-only file for writing
-
-admin$ logout
 ```
-
-### Comprehensive Testing
-See [DEMO_SCRIPT.txt](docs/DEMO_SCRIPT.txt) for 18 detailed test scenarios.
-
-## 📊 Project Statistics
-
-- **Lines of Code Added:** ~2000+
-- **Files Modified:** 25+
-- **New Programs:** 5
-- **Documentation:** 13 comprehensive files (~100KB)
-- **Features Implemented:** 9
-- **Bugs Fixed:** 4
+xv6-enhanced/
+├── README.md                 # This file
+├── CHANGES.md               # Detailed list of modifications
+├── HOW_TO_TEST.md          # Comprehensive testing guide
+├── xv6-source/             # Enhanced XV6 source code
+│   ├── Makefile            # Build configuration
+│   ├── *.c, *.h           # Source files with enhancements
+│   └── ...
+└── project-report/         # LaTeX project report
+    ├── XV6_PROJECT_REPORT_NEW.tex
+    └── images/             # Screenshots and documentation
+```
 
 ## 🎓 Educational Value
 
-This project demonstrates:
-- Operating system security concepts
-- User authentication mechanisms
-- File permission systems
-- System call implementation
-- Shell enhancements
-- Error handling and user feedback
+This project provides hands-on experience with:
+- **Process scheduling algorithms** (MLFQ implementation)
+- **Operating system security** (authentication and permissions)
+- **System programming** (kernel modifications and system calls)
+- **User interface design** (shell enhancements)
+- **Software testing** (comprehensive validation)
 
 ## 🤝 Contributing
 
-This is an educational project based on MIT's XV6 operating system. Feel free to:
-- Report issues
-- Suggest improvements
-- Fork and experiment
-- Use for learning
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 📄 License
 
-Based on XV6, which is licensed under the MIT License.
+This project is based on MIT xv6 and follows the same licensing terms.
 
 ## 🙏 Acknowledgments
 
-- MIT CSAIL for the original XV6 operating system
-- The XV6 book and documentation
-- All contributors to the XV6 project
+- MIT xv6 development team for the excellent educational OS
+- IIITDM Kancheepuram for project support
+- Operating Systems course instructors and peers
 
-## 📧 Contact
+## 📞 Contact
 
-- **Author**: AnjaniNithin
-- **GitHub**: [@Nithinchalamchala](https://github.com/Nithinchalamchala)
-- **Repository**: [XV6_Modified](https://github.com/Nithinchalamchala/xv6-enhanced-kernel)
+**Anjani Nithin** - CS23B1012  
+**Project**: Operating Systems Course  
+**Institution**: IIITDM Kancheepuram
 
 ---
 
-**Status:** ✅ Complete and Working  
-**Last Updated:** November 23, 2025  
-**Version:** 1.0.0
+⭐ **Star this repository if you found it helpful for learning operating systems!**
