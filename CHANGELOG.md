@@ -2,6 +2,25 @@
 
 All notable changes to the XV6 User Authentication & File Permissions project.
 
+## [1.1.0] - 2025-11-23
+
+### Added
+- **Command History** - Navigate through last 10 commands using up/down arrow keys
+- **Clear Command** - Built-in `clear` command to clear the screen
+- **History Command** - Built-in `history` command to view command history
+- Visual feedback for backspace (character erasing)
+- Character echoing for better user experience
+
+### Changed
+- Enhanced shell input handling with arrow key support
+- Improved command-line editing experience
+
+### Technical Details
+- Added command history buffer (10 commands)
+- Implemented escape sequence handling for arrow keys
+- Added ANSI escape codes for screen clearing
+- Enhanced getcmd() function with history navigation
+
 ## [1.0.0] - 2025-11-23
 
 ### Added

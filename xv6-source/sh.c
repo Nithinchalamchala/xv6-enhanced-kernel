@@ -185,6 +185,32 @@ tab_complete(char *buf, int pos)
   }
 }
 
+// Command history
+#define HISTORY_SIZE 10
+static char history[HISTORY_SIZE][100];
+static int history_count = 0;
+static int history_index = 0;
+
+void
+add_to_history(char *cmd)
+{
+  // Don't add empty commands or duplicates
+  if(cmd[0] == '\n' || cmd[0] == 0)
+    return;
+  
+  // Check if same as last command
+  if(history_count > 0){
+    int last = (history_count - 1) % HISTORY_SIZE;
+    if(strcmp(history[last], cmd) == 0)
+      return;
+  }
+  
+  // Add to history
+  int idx = history_count % HISTORY_SIZE;
+  safestrcpy(history[idx], cmd, 100);
+  history_count++;
+}
+
 int
 getcmd(char *buf, int nbuf)
 {
@@ -198,27 +224,82 @@ getcmd(char *buf, int nbuf)
   printf(2, "%s$ ", username);
   memset(buf, 0, nbuf);
   
-  // Read with tab completion support
+  // Read with tab completion and history support
   int i = 0;
   int c;
+  history_index = history_count; // Start at end of history
+  
   while((c = getchar()) != '\n' && c != '\r'){
     if(c == '\t'){
       // Tab pressed - try completion
       tab_complete(buf, i);
-      // Re-read buffer position
       i = strlen(buf);
     } else if(c == 0x7f || c == '\b'){
       // Backspace
       if(i > 0){
         i--;
         buf[i] = 0;
+        printf(2, "\b \b"); // Erase character on screen
+      }
+    } else if(c == 27){
+      // Escape sequence (arrow keys)
+      c = getchar();
+      if(c == '['){
+        c = getchar();
+        if(c == 'A'){
+          // Up arrow - previous command
+          if(history_index > 0 && history_index > history_count - HISTORY_SIZE){
+            history_index--;
+            int idx = history_index % HISTORY_SIZE;
+            // Clear current line
+            while(i > 0){
+              printf(2, "\b \b");
+              i--;
+            }
+            // Copy history command
+            safestrcpy(buf, history[idx], nbuf);
+            i = strlen(buf);
+            if(i > 0 && buf[i-1] == '\n')
+              i--;
+            buf[i] = 0;
+            printf(2, "%s", buf);
+          }
+        } else if(c == 'B'){
+          // Down arrow - next command
+          if(history_index < history_count){
+            history_index++;
+            // Clear current line
+            while(i > 0){
+              printf(2, "\b \b");
+              i--;
+            }
+            if(history_index < history_count){
+              int idx = history_index % HISTORY_SIZE;
+              safestrcpy(buf, history[idx], nbuf);
+              i = strlen(buf);
+              if(i > 0 && buf[i-1] == '\n')
+                i--;
+              buf[i] = 0;
+              printf(2, "%s", buf);
+            } else {
+              buf[0] = 0;
+              i = 0;
+            }
+          }
+        }
       }
     } else if(i < nbuf - 1){
       buf[i++] = c;
+      printf(2, "%c", c); // Echo character
     }
   }
   buf[i] = '\n';
   buf[i+1] = 0;
+  
+  // Add to history if not empty
+  if(buf[0] != '\n' && buf[0] != 0){
+    add_to_history(buf);
+  }
   
   if(buf[0] == 0) // EOF
     return -1;
@@ -246,6 +327,25 @@ main(void)
       buf[strlen(buf)-1] = 0;  // chop \n
       if(chdir(buf+3) < 0)
         printf(2, "cannot cd %s\n", buf+3);
+      continue;
+    }
+    // Check for clear command - clear the screen
+    if(buf[0] == 'c' && buf[1] == 'l' && buf[2] == 'e' && 
+       buf[3] == 'a' && buf[4] == 'r' && 
+       (buf[5] == '\n' || buf[5] == '\r' || buf[5] == ' ')){
+      // ANSI escape code to clear screen and move cursor to top
+      printf(1, "\033[2J\033[H");
+      continue;
+    }
+    // Check for history command - show command history
+    if(buf[0] == 'h' && buf[1] == 'i' && buf[2] == 's' && 
+       buf[3] == 't' && buf[4] == 'o' && buf[5] == 'r' && buf[6] == 'y' &&
+       (buf[7] == '\n' || buf[7] == '\r' || buf[7] == ' ')){
+      int start = history_count > HISTORY_SIZE ? history_count - HISTORY_SIZE : 0;
+      for(int j = start; j < history_count; j++){
+        int idx = j % HISTORY_SIZE;
+        printf(1, "%d  %s", j + 1, history[idx]);
+      }
       continue;
     }
     // Check for logout command - exit shell to return to login

@@ -33,6 +33,9 @@ xv6-user-authentication/
   - `user2/pass2` - Read and write access
 - ✅ **Enhanced Shell**:
   - Tab completion for filenames
+  - Command history (up/down arrows for last 10 commands)
+  - Clear command to clear screen
+  - History command to view past commands
   - User-specific prompt (admin$, user1$, user2$)
   - Built-in logout command
 - ✅ **New Commands**:
@@ -157,11 +160,36 @@ rw-- README         uid:1 2 1 2286
 rw-- test.txt       uid:1 2 24 12
 ```
 
+### clear
+Clear the screen
+```bash
+admin$ clear
+```
+
+### history
+View command history
+```bash
+admin$ history
+1  whoami
+2  echo "test" > file.txt
+3  ls
+4  cat file.txt
+```
+
 ### Tab Completion
 Press TAB to auto-complete filenames
 ```bash
 admin$ cat RE<TAB>
 admin$ cat README
+```
+
+### Command History
+Use up/down arrow keys to navigate through previous commands
+```bash
+admin$ whoami
+admin (uid: 1)
+admin$ <press UP arrow>
+admin$ whoami  # Previous command appears
 ```
 
 ## 🐛 Bugs Fixed
