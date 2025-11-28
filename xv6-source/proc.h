@@ -51,6 +51,12 @@ struct proc {
   char name[16];               // Process name (debugging)
   int uid;                     // User ID of process owner
   int permissions;             // User permissions
+  
+  // MLFQ scheduling fields
+  int priority;                // Current priority level (0=highest, 2=lowest)
+  int ticks_used;              // Ticks used in current quantum
+  int wait_ticks;              // Ticks spent waiting (for aging)
+  uint total_runtime;          // Total CPU time used
 };
 
 // Process memory is laid out contiguously, low addresses first:

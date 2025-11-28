@@ -100,11 +100,30 @@ trap(struct trapframe *tf)
   if(myproc() && myproc()->killed && (tf->cs&3) == DPL_USER)
     exit();
 
-  // Force process to give up CPU on clock tick.
-  // If interrupts were on while locks held, would need to check nlock.
+  // MLFQ: Handle timer tick for running process
   if(myproc() && myproc()->state == RUNNING &&
-     tf->trapno == T_IRQ0+IRQ_TIMER)
-    yield();
+     tf->trapno == T_IRQ0+IRQ_TIMER){
+    struct proc *p = myproc();
+    p->ticks_used++;
+    p->total_runtime++;
+    
+    // Check if process used up its quantum
+    int quantum;
+    if(p->priority == 0) quantum = 4;       // High priority
+    else if(p->priority == 1) quantum = 8;  // Medium priority
+    else quantum = 16;                      // Low priority
+    
+    if(p->ticks_used >= quantum){
+      // Demote to lower priority if not already at lowest
+      if(p->priority < 2){
+        p->priority++;
+        cprintf("[MLFQ] Process %d (%s) demoted to queue %d\n", 
+                p->pid, p->name, p->priority);
+      }
+      p->ticks_used = 0;
+      yield();  // Give up CPU
+    }
+  }
 
   // Check if the process has been killed since we yielded
   if(myproc() && myproc()->killed && (tf->cs&3) == DPL_USER)

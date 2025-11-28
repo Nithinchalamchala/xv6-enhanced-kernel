@@ -186,6 +186,10 @@ UPROGS=\
 	_whoami\
 	_chmod\
 	_reboot\
+	_cpubound\
+	_iobound\
+	_mixed\
+	_mlfqtest\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)

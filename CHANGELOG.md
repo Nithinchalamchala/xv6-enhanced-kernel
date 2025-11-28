@@ -2,6 +2,27 @@
 
 All notable changes to the XV6 User Authentication & File Permissions project.
 
+## [1.2.0] - 2025-11-23
+
+### Added
+- **MLFQ Scheduler** - Multi-Level Feedback Queue scheduler with 3 priority levels
+- **Priority Queues** - High (4 ticks), Medium (8 ticks), Low (16 ticks) quantum
+- **Priority Boost** - Periodic boost every 100 ticks to prevent starvation
+- **Aging Mechanism** - Promote processes waiting > 50 ticks
+- **Scheduler Logging** - Console messages showing scheduler decisions
+- **Test Programs** - cpubound, iobound, mixed, mlfqtest for testing MLFQ
+
+### Changed
+- Replaced simple round-robin scheduler with MLFQ
+- Enhanced process structure with priority, ticks_used, wait_ticks, total_runtime
+- Modified timer interrupt handler to track CPU usage and demote processes
+
+### Technical Details
+- 3-level priority queue implementation
+- Dynamic priority adjustment based on CPU usage
+- Prevents starvation through boost and aging
+- Favors I/O-bound processes (better responsiveness)
+
 ## [1.1.0] - 2025-11-23
 
 ### Added

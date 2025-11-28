@@ -90,6 +90,12 @@ found:
   p->pid = nextpid++;
   p->uid = 0;  // No user logged in initially
   p->permissions = 0;
+  
+  // Initialize MLFQ fields
+  p->priority = 0;        // Start at highest priority
+  p->ticks_used = 0;
+  p->wait_ticks = 0;
+  p->total_runtime = 0;
 
   release(&ptable.lock);
 
@@ -316,17 +322,48 @@ wait(void)
 }
 
 //PAGEBREAK: 42
-// Per-CPU process scheduler.
-// Each CPU calls scheduler() after setting itself up.
-// Scheduler never returns.  It loops, doing:
-//  - choose a process to run
-//  - swtch to start running that process
-//  - eventually that process transfers control
-//      via swtch back to the scheduler.
+// MLFQ Scheduler Configuration
+#define MLFQ_LEVELS 3
+#define QUANTUM_0 4    // High priority: 4 ticks
+#define QUANTUM_1 8    // Medium priority: 8 ticks
+#define QUANTUM_2 16   // Low priority: 16 ticks
+#define BOOST_INTERVAL 100  // Priority boost every 100 ticks
+#define AGING_THRESHOLD 50  // Promote if waiting > 50 ticks
+
+static int boost_timer = 0;
+
+// Get time quantum for priority level
+int
+get_quantum(int priority)
+{
+  if(priority == 0) return QUANTUM_0;
+  if(priority == 1) return QUANTUM_1;
+  return QUANTUM_2;
+}
+
+// Priority boost - move all processes to highest priority
+void
+priority_boost(void)
+{
+  struct proc *p;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->state != UNUSED){
+      p->priority = 0;
+      p->ticks_used = 0;
+      p->wait_ticks = 0;
+    }
+  }
+  boost_timer = 0;
+  cprintf("[MLFQ] Priority boost - all processes moved to queue 0\n");
+}
+
+// Per-CPU MLFQ scheduler
+// Implements Multi-Level Feedback Queue with 3 priority levels
 void
 scheduler(void)
 {
   struct proc *p;
+  struct proc *selected;
   struct cpu *c = mycpu();
   c->proc = 0;
   
@@ -334,28 +371,63 @@ scheduler(void)
     // Enable interrupts on this processor.
     sti();
 
-    // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE)
-        continue;
-
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
+    
+    // Priority boost if needed
+    boost_timer++;
+    if(boost_timer >= BOOST_INTERVAL){
+      priority_boost();
+    }
+    
+    // Select process using MLFQ
+    selected = 0;
+    
+    // Try each priority level (0 = highest, 2 = lowest)
+    for(int priority = 0; priority < MLFQ_LEVELS && !selected; priority++){
+      for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+        if(p->state != RUNNABLE)
+          continue;
+        
+        if(p->priority == priority){
+          selected = p;
+          break;
+        }
+      }
+    }
+    
+    // If we found a process, run it
+    if(selected){
+      p = selected;
+      
+      // Switch to chosen process
       c->proc = p;
       switchuvm(p);
       p->state = RUNNING;
+      p->wait_ticks = 0;  // Reset wait time
 
       swtch(&(c->scheduler), p->context);
       switchkvm();
 
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
+      // Process is done running for now
       c->proc = 0;
+    } else {
+      // No runnable process - age waiting processes
+      for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+        if(p->state == RUNNABLE){
+          p->wait_ticks++;
+          // Aging: promote if waiting too long
+          if(p->wait_ticks >= AGING_THRESHOLD && p->priority > 0){
+            p->priority--;
+            p->wait_ticks = 0;
+            p->ticks_used = 0;
+            cprintf("[MLFQ] Process %d promoted to queue %d (aging)\n", 
+                    p->pid, p->priority);
+          }
+        }
+      }
     }
+    
     release(&ptable.lock);
-
   }
 }
 

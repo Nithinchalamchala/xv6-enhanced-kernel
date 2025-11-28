@@ -31,6 +31,12 @@ xv6-user-authentication/
   - `admin/admin` - Full access (read, write, chmod)
   - `user1/pass1` - Read-only access
   - `user2/pass2` - Read and write access
+- ✅ **MLFQ Scheduler**:
+  - Multi-Level Feedback Queue with 3 priority levels
+  - Dynamic priority adjustment based on CPU usage
+  - Priority boost and aging to prevent starvation
+  - Better responsiveness for I/O-bound processes
+  - Test programs to demonstrate scheduler behavior
 - ✅ **Enhanced Shell**:
   - Tab completion for filenames
   - Command history (up/down arrows for last 10 commands)

@@ -207,7 +207,10 @@ add_to_history(char *cmd)
   
   // Add to history
   int idx = history_count % HISTORY_SIZE;
-  safestrcpy(history[idx], cmd, 100);
+  int len = strlen(cmd);
+  if(len >= 100) len = 99;
+  memmove(history[idx], cmd, len);
+  history[idx][len] = 0;
   history_count++;
 }
 
@@ -257,8 +260,11 @@ getcmd(char *buf, int nbuf)
               i--;
             }
             // Copy history command
-            safestrcpy(buf, history[idx], nbuf);
-            i = strlen(buf);
+            int len = strlen(history[idx]);
+            if(len >= nbuf) len = nbuf - 1;
+            memmove(buf, history[idx], len);
+            buf[len] = 0;
+            i = len;
             if(i > 0 && buf[i-1] == '\n')
               i--;
             buf[i] = 0;
@@ -275,8 +281,11 @@ getcmd(char *buf, int nbuf)
             }
             if(history_index < history_count){
               int idx = history_index % HISTORY_SIZE;
-              safestrcpy(buf, history[idx], nbuf);
-              i = strlen(buf);
+              int len = strlen(history[idx]);
+              if(len >= nbuf) len = nbuf - 1;
+              memmove(buf, history[idx], len);
+              buf[len] = 0;
+              i = len;
               if(i > 0 && buf[i-1] == '\n')
                 i--;
               buf[i] = 0;
